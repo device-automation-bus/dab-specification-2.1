@@ -503,7 +503,6 @@ interface ListSupportedOperationResponse extends DabResponse {
 {
    "status": 200,
    "operations": [
-      "applications/list",
       "applications/launch",
       "applications/launch-with-content",
       "applications/get-state",
