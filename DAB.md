@@ -2772,9 +2772,11 @@ only outputs currently supported.
 
 *Operation model: Request / Response*
 
-This operation captures the current device output and returns a base64 encoded
-image. The image should include video and graphics plane content. The image data
-should be in PNG format.
+This operation captures the current output of the device and returns an image
+that is base64 encoded. The image must include both graphics plane content and
+clear (non-DRM) stream video. DRM content and any video that passes through the
+device's secure video pipeline or trusted execution environment shall not be in
+the captured image. The image data must be in PNG format.
 
 ##### Request topic
 
