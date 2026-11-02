@@ -914,17 +914,26 @@ interface GetApplicationStateResponse extends DabResponse {
 This operation exits the application.
 
 *   If the optional *background* parameter is set, this operation attempts to
-    move the application to the BACKGROUND state.
+    move the application to the BACKGROUND state:
+    *   If the application is in the FOREGROUND state, this operation moves the
+        application to the BACKGROUND state.
+    *   If the application is in the BACKGROUND or STOPPED state, this operation
+        doesn't change the state of the application and returns a `200` status
+        with the current `state`.
 *   If the *background* parameter is omitted or is set to false, this operation
-    attempts to completely stop the application and move it to a STOPPED state.
+    attempts to completely stop the application and move it to a STOPPED state:
+    *   If the application is in the FOREGROUND or BACKGROUND state, this
+        operation stops the application and moves it to the STOPPED state.
+    *   If the application is in the STOPPED state, this operation doesn't
+        change the state of the application and returns a `200` status with
+        `state` set to `STOPPED`.
 
 When using the exit operation without the background flag, the intention is to
 stop/kill the corresponding application process. When using the exit operation
 with the background flag, the intention is to put the application in a
-background state, similarly to when the user presses the `home` key. The
-response should only be sent after the application state has changed on the
-platform.
-
+background state, similarly to when the user presses the `home` key. Send the
+response only after the application reaches the target state on the platform, or
+immediately if no state change is required.
 ###### Request topic
 
 `dab/[DEVICE_ID]/applications/exit`
