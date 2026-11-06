@@ -29,7 +29,8 @@ Version: 2.1  |  Last Updated: 2025-12-01
   - `timeZone`: Set device time zone using IANA formats
   - `screenSaver`: Enable/disable screensaver
   - `screenSaverTimeout`: Set screensaver timeout in seconds
-  - `screenSaverMinTimeout`: Minimum screensaver timeout value
+  - `screenSaverMinTimeout`: Minimum screensaver timeout value (deprecated, use `screenSaverTimeout.min`)
+  - `screenSaverTimeout` (in `system/settings/list`): Supported screensaver timeout range and, for devices that only offer fixed options, the list of allowed values
   - `personalizedAds`: Enable/disable personalized advertisements
   - `highContrastText`: Enable/disable high contrast text
   - `identifierForAdvertising`: Control advertising identifier
@@ -1832,7 +1833,12 @@ interface ListSupportedSystemSettingsResponse extends DabResponse {
    timeZone: TimeZone [];
    textToSpeech: boolean;
    screenSaver: boolean;
-   screenSaverMinTimeout: number;
+   screenSaverMinTimeout: number; // Deprecated, use screenSaverTimeout.min
+   screenSaverTimeout: {
+      min: number;
+      max: number;
+      values?: number[];
+   },
    personalizedAds: boolean;
    highContrastText: boolean;
    identifierForAdvertising: boolean;
@@ -1915,7 +1921,11 @@ interface ListSupportedSystemSettingsResponse extends DabResponse {
     </tr>
     <tr>
       <td>screenSaverMinTimeout</td>
-      <td>Minimum screensaver timeout in seconds (maximum 60).</td>
+      <td>Deprecated, use <code>screenSaverTimeout.min</code>. Minimum screensaver timeout in seconds. If present, it must equal <code>screenSaverTimeout.min</code>.</td>
+    </tr>
+    <tr>
+      <td>screenSaverTimeout</td>
+      <td>Supported screensaver timeout values in seconds. <code>min</code> and <code>max</code> give the supported range. If <code>values</code> is present, the device only supports those exact values (sorted ascending, with <code>min</code> and <code>max</code> equal to the first and last entries); otherwise any value from <code>min</code> to <code>max</code> is supported. If the field is absent, clients should assume <code>{ min: screenSaverMinTimeout }</code>.</td>
     </tr>
     <tr>
       <td>personalizedAds</td>
@@ -1941,6 +1951,7 @@ For settings with minimum/maximum values:
 
 - `min`: Minimum supported value for the setting.
 - `max`: Maximum supported value for the setting.
+- `values` (optional): The exact values the setting supports, for devices that only offer fixed options. When present, only these values are valid.
 
 ###### Sample response
 
@@ -1983,7 +1994,12 @@ For settings with minimum/maximum values:
    "timeZone": ["America/New_York", "America/Los_Angeles", "Europe/London", "Asia/Tokyo"],
    "textToSpeech": true,
    "screenSaver": true,
-   "screenSaverMinTimeout": 5,
+   "screenSaverMinTimeout": 120,
+   "screenSaverTimeout": {
+      "min": 120,
+      "max": 600,
+      "values": [120, 300, 600]
+   },
    "personalizedAds": true,
    "highContrastText": true,
    "identifierForAdvertising": true
@@ -2236,6 +2252,15 @@ Error:
 {
    "status": 400,
    "error": "Setting outputResolution does not support value { width: 3840, height: 2160, frequency: 60}"
+}
+```
+
+A device that advertises `screenSaverTimeout` with `values` must reject any other value:
+
+```json
+{
+   "status": 400,
+   "error": "Setting screenSaverTimeout does not support value 240"
 }
 ```
 
